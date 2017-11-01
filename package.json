@@ -1,6 +1,6 @@
 {
   "name": "app-tracelog",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Devebot application tracelog layerware",
   "homepage": "https://github.com/apporo/app-tracelog.git",
   "author": {
@@ -17,12 +17,12 @@
     "devebot-plugin"
   ],
   "peerDependencies": {
-    "app-webserver": "^0.1.11",
-    "devebot": "^0.1.23"
+    "app-webweaver": "^0.2.0",
+    "devebot": "^0.2.0"
   },
   "dependencies": {
-    "app-webserver": "^0.1.11",
-    "devebot": "^0.1.23",
+    "app-webweaver": "^0.2.0",
+    "devebot": "^0.2.0",
     "request-tracer": "^0.1.4"
   }
 }
