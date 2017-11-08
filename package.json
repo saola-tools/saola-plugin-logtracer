@@ -17,12 +17,12 @@
     "devebot-plugin"
   ],
   "peerDependencies": {
-    "app-webweaver": "^0.2.0",
-    "devebot": "^0.2.0"
+    "app-webweaver": "^0.2.1",
+    "devebot": "^0.2.1"
   },
   "dependencies": {
-    "app-webweaver": "^0.2.0",
-    "devebot": "^0.2.0",
+    "app-webweaver": "^0.2.1",
+    "devebot": "^0.2.1",
     "request-tracer": "^0.1.4"
   }
 }
