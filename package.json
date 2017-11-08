@@ -23,6 +23,6 @@
   "dependencies": {
     "app-webweaver": "^0.2.1",
     "devebot": "^0.2.1",
-    "request-tracer": "^0.1.4"
+    "logolite": "^0.1.3"
   }
 }
