@@ -20,9 +20,12 @@ var Service = function(params) {
   var router = new express();
   router.set('views', __dirname + '/../../views');
   router.set('view engine', 'ejs');
-  router.route('/index').get(function(req, res, next) {
-    logger.debug('RequestId: %s', req.traceRequestId);
+  router.route('/tracing/index').get(function(req, res, next) {
+    logger.debug('--- RequestID --- : %s', req.traceRequestId);
     res.render('index', {requestId: req.traceRequestId});
+  });
+  router.route('/bypass/index').get(function(req, res, next) {
+    res.render('index', {requestId: req.traceRequestId || '[empty]'});
   });
 
   params.tracelogService.push([

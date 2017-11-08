@@ -8,7 +8,7 @@ module.exports = {
     appTracelog: {
       tracingRequestName: 'traceRequestId',
       tracingRequestHeader: 'X-Trace-Request-Id',
-      tracingPaths: [ contextPath + '/*' ]
+      tracingPaths: [ contextPath + '/tracing' ]
     },
     appWebweaver: {
     }
