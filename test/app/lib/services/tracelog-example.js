@@ -39,17 +39,6 @@ var Service = function(params) {
   debuglog.isEnabled && debuglog(' - constructor end!');
 };
 
-Service.argumentSchema = {
-  "id": "tracelogExample",
-  "type": "object",
-  "properties": {
-    "tracelogService": {
-      "type": "object"
-    },
-    "webweaverService": {
-      "type": "object"
-    }
-  }
-};
+Service.referenceList = [ "tracelogService", "webweaverService" ];
 
 module.exports = Service;
