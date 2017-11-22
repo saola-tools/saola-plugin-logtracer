@@ -21,7 +21,7 @@ var Service = function(params) {
   router.set('views', __dirname + '/../../views');
   router.set('view engine', 'ejs');
   router.route('/tracing/index').get(function(req, res, next) {
-    logger.debug('--- RequestID --- : %s', req.traceRequestId);
+    logger.debug('--- RequestID --- : %s', params.tracelogService.getRequestId(req));
     res.render('index', {requestId: req.traceRequestId});
   });
   router.route('/bypass/index').get(function(req, res, next) {
