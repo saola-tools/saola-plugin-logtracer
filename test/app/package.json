@@ -1,0 +1,11 @@
+{
+  "name": "app-tracelog-example",
+  "version": "0.1.0",
+  "description": "Devebot app-tracelog Example",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "devebot",
+  "license": "MIT"
+}

@@ -1,9 +1,21 @@
-# app-sidebar test/app
+# app-sidebar test/example
 
 ## Usage
 
-### Run
+Build the module:
 
 ```shell
-$ DEBUG=devebot*,app* node test/app
+$ npm run build
+```
+
+Start the example:
+
+```shell
+$ DEBUG=app* node test/example
+```
+
+Make a request:
+
+```shell
+$ curl http://localhost:7979/tracelog-demo/tracing/index
 ```
