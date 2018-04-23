@@ -1,21 +1,28 @@
 'use strict';
 
 var Devebot = require('devebot');
+var chores = Devebot.require('chores');
 var lodash = Devebot.require('lodash');
-var debugx = Devebot.require('debug')('appTracelog:service');
 
 var Service = function(params) {
-  debugx.enabled && debugx(' + constructor begin ...');
-
   params = params || {};
-
   var self = this;
-  var pluginCfg = params.sandboxConfig;
+
   var LX = params.loggingFactory.getLogger();
   var TR = params.loggingFactory.getTracer();
+  var packageName = params.packageName || 'app-tracelog';
+  var blockRef = chores.getBlockRef(__filename, packageName);
+
+  LX.has('silly') && LX.log('silly', TR.toMessage({
+    tags: [ blockRef, 'constructor-begin' ],
+    text: ' + constructor start ...'
+  }));
+
+  var pluginCfg = params.sandboxConfig;
+  var tracingRequestName = pluginCfg.tracingRequestName || 'requestId';
 
   self.getRequestId = function(req) {
-    return req && req[pluginCfg.tracingRequestName || 'requestId'];
+    return req && req[tracingRequestName];
   }
 
   var tracingPaths = lodash.get(pluginCfg, ['tracingPaths']);
@@ -29,15 +36,17 @@ var Service = function(params) {
   }
 
   var tracingBoundary = function(req, res, next) {
-    LX.isEnabledFor('debug') && LX.log('debug', TR.add({
-      message: 'Request is coming',
-      requestId: req[pluginCfg.tracingRequestName]
-    }).toMessage());
+    LX.has('debug') && LX.log('debug', TR.add({
+      requestId: req[tracingRequestName]
+    }).toMessage({
+      text: 'Request[${requestId}] is coming'
+    }));
     req.on('end', function() {
-      LX.isEnabledFor('debug') && LX.log('debug', TR.add({
-        message: 'Request has finished',
-        requestId: req[pluginCfg.tracingRequestName]
-      }).toMessage());
+      LX.has('debug') && LX.log('debug', TR.add({
+        requestId: req[tracingRequestName]
+      }).toMessage({
+        text: 'Request[${requestId}] has finished'
+      }));
     });
     next();
   };
@@ -52,20 +61,22 @@ var Service = function(params) {
   }
 
   var requestInterceptor = function(req, res, next) {
-    req[pluginCfg.tracingRequestName] = req[pluginCfg.tracingRequestName] ||
-        req.get(pluginCfg.tracingRequestHeader) || req.query[pluginCfg.tracingRequestName];
-    if (!req[pluginCfg.tracingRequestName]) {
-      req[pluginCfg.tracingRequestName] = TR.getLogID();
-      LX.isEnabledFor('info') && LX.log('info', TR.add({
-        message: 'RequestID is generated',
-        requestId: req[pluginCfg.tracingRequestName]
-      }).toMessage());
+    req[tracingRequestName] = req[tracingRequestName] ||
+        req.get(pluginCfg.tracingRequestHeader) || req.query[tracingRequestName];
+    if (!req[tracingRequestName]) {
+      req[tracingRequestName] = TR.getLogID();
+      LX.has('info') && LX.log('info', TR.add({
+        requestId: req[tracingRequestName]
+      }).toMessage({
+        text: 'RequestID[${requestId}] is generated'
+      }));
     }
-    res.setHeader(pluginCfg.tracingRequestHeader, req[pluginCfg.tracingRequestName]);
-    LX.isEnabledFor('info') && LX.log('info', TR.add({
-      message: 'RequestID is set to response header',
-      requestId: req[pluginCfg.tracingRequestName]
-    }).toMessage());
+    res.setHeader(pluginCfg.tracingRequestHeader, req[tracingRequestName]);
+    LX.has('info') && LX.log('info', TR.add({
+      requestId: req[tracingRequestName]
+    }).toMessage({
+      text: 'RequestID[${requestId}] is set to response header'
+    }));
     next();
   };
 
@@ -90,7 +101,10 @@ var Service = function(params) {
     ], pluginCfg.priority);
   }
 
-  debugx.enabled && debugx(' - constructor end!');
+  LX.has('silly') && LX.log('silly', TR.toMessage({
+    tags: [ blockRef, 'constructor-end' ],
+    text: ' - constructor end!'
+  }));
 };
 
 Service.referenceList = [ "webweaverService" ];

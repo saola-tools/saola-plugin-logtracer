@@ -6,8 +6,8 @@ var lodash = Devebot.require('lodash');
 var pinbug = Devebot.require('pinbug');
 
 var Service = function(params) {
-  var dbg = pinbug('appTracelog:example');
-  dbg.isEnabled && dbg(' + constructor begin ...');
+  var dbg = pinbug('app-tracelog:example');
+  dbg.enabled && dbg(' + constructor begin ...');
 
   params = params || {};
 
@@ -43,7 +43,7 @@ var Service = function(params) {
     }
   ], pluginCfg.priority);
 
-  dbg.isEnabled && dbg(' - constructor end!');
+  dbg.enabled && dbg(' - constructor end!');
 };
 
 Service.referenceList = [ "tracelogService", "webweaverService" ];
