@@ -1,4 +1,4 @@
-# app-sidebar test/example
+# app-tracelog test/example
 
 ## Usage
 
@@ -11,11 +11,13 @@ $ npm run build
 Start the example:
 
 ```shell
-$ DEBUG=app* node test/example
+export DEBUG=app*
+export LOGOLITE_DEBUGLOG_ENABLED=true
+node test/example
 ```
 
 Make a request:
 
 ```shell
-$ curl http://localhost:7979/tracelog-demo/tracing/index
+curl http://localhost:7979/tracelog-demo/tracing/index
 ```

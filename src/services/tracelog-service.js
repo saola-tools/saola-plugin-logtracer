@@ -1,31 +1,32 @@
 'use strict';
 
-var Devebot = require('devebot');
-var chores = Devebot.require('chores');
-var lodash = Devebot.require('lodash');
+const Devebot = require('devebot');
+const chores = Devebot.require('chores');
+const lodash = Devebot.require('lodash');
 
-var Service = function(params) {
+function TracelogService(params) {
   params = params || {};
-  var self = this;
+  let self = this;
 
-  var LX = params.loggingFactory.getLogger();
-  var TR = params.loggingFactory.getTracer();
-  var packageName = params.packageName || 'app-tracelog';
-  var blockRef = chores.getBlockRef(__filename, packageName);
+  let LX = params.loggingFactory.getLogger();
+  let TR = params.loggingFactory.getTracer();
+  let packageName = params.packageName || 'app-tracelog';
+  let blockRef = chores.getBlockRef(__filename, packageName);
 
   LX.has('silly') && LX.log('silly', TR.toMessage({
     tags: [ blockRef, 'constructor-begin' ],
     text: ' + constructor start ...'
   }));
 
-  var pluginCfg = params.sandboxConfig;
-  var tracingRequestName = pluginCfg.tracingRequestName || 'requestId';
+  let pluginCfg = params.sandboxConfig;
+  let tracingRequestName = pluginCfg.tracingRequestName || 'requestId';
+  let webweaverService = params["app-webweaver/webweaverService"];
 
   self.getRequestId = function(req) {
     return req && req[tracingRequestName];
   }
 
-  var tracingPaths = lodash.get(pluginCfg, ['tracingPaths']);
+  let tracingPaths = lodash.get(pluginCfg, ['tracingPaths']);
   if (lodash.isString(tracingPaths)) tracingPaths = [ tracingPaths ];
   if (!lodash.isArray(tracingPaths)) tracingPaths = [];
 
@@ -35,7 +36,7 @@ var Service = function(params) {
     tracingPaths = lodash.union(tracingPaths, paths);
   }
 
-  var tracingBoundary = function(req, res, next) {
+  let tracingBoundary = function(req, res, next) {
     LX.has('debug') && LX.log('debug', TR.add({
       requestId: req[tracingRequestName]
     }).toMessage({
@@ -60,7 +61,7 @@ var Service = function(params) {
     }
   }
 
-  var requestInterceptor = function(req, res, next) {
+  let requestInterceptor = function(req, res, next) {
     req[tracingRequestName] = req[tracingRequestName] ||
         req.get(pluginCfg.tracingRequestHeader) || req.query[tracingRequestName];
     if (!req[tracingRequestName]) {
@@ -91,11 +92,11 @@ var Service = function(params) {
 
   self.push = function(layerOrBranches, priority) {
     priority = (typeof(priority) === 'number') ? priority : pluginCfg.priority;
-    params.webweaverService.push(layerOrBranches, priority);
+    webweaverService.push(layerOrBranches, priority);
   }
 
   if (pluginCfg.autowired !== false) {
-    params.webweaverService.push([
+    webweaverService.push([
       self.getTracingListenerLayer(),
       self.getTracingBoundaryLayer()
     ], pluginCfg.priority);
@@ -107,6 +108,6 @@ var Service = function(params) {
   }));
 };
 
-Service.referenceList = [ "webweaverService" ];
+TracelogService.referenceList = [ "app-webweaver/webweaverService" ];
 
-module.exports = Service;
+module.exports = TracelogService;
