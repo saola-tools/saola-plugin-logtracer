@@ -40,13 +40,13 @@ function TracelogService(params) {
     LX.has('debug') && LX.log('debug', TR.add({
       requestId: req[tracingRequestName]
     }).toMessage({
-      text: 'Request[${requestId}] is coming'
+      text: 'Request[${requestId}] is coming (begin)'
     }));
     req.on('end', function() {
       LX.has('debug') && LX.log('debug', TR.add({
         requestId: req[tracingRequestName]
       }).toMessage({
-        text: 'Request[${requestId}] has finished'
+        text: 'Request[${requestId}] has finished (end)'
       }));
     });
     next();
@@ -96,10 +96,11 @@ function TracelogService(params) {
   }
 
   if (pluginCfg.autowired !== false) {
-    webweaverService.push([
-      self.getTracingListenerLayer(),
-      self.getTracingBoundaryLayer()
-    ], pluginCfg.priority);
+    let layers = [ self.getTracingListenerLayer() ];
+    if (pluginCfg.tracingBoundaryEnabled) {
+      layers.push(self.getTracingBoundaryLayer());
+    }
+    webweaverService.push(layers, pluginCfg.priority);
   }
 
   LX.has('silly') && LX.log('silly', TR.toMessage({

@@ -3,7 +3,8 @@ module.exports = {
     appTracelog: {
       tracingRequestName: 'requestId',
       tracingRequestHeader: 'X-Request-Id',
-      tracingPaths: []
+      tracingPaths: [],
+      tracingBoundaryEnabled: false
     }
   }
 };
