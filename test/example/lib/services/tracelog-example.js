@@ -1,14 +1,6 @@
 'use strict';
 
-var Devebot = require('devebot');
-var Promise = Devebot.require('bluebird');
-var lodash = Devebot.require('lodash');
-var pinbug = Devebot.require('pinbug');
-
 var Service = function(params) {
-  var dbg = pinbug('app-tracelog:example');
-  dbg.enabled && dbg(' + constructor begin ...');
-
   params = params || {};
 
   var self = this;
@@ -42,8 +34,6 @@ var Service = function(params) {
       middleware: router
     }
   ], pluginCfg.priority);
-
-  dbg.enabled && dbg(' - constructor end!');
 };
 
 Service.referenceList = [ "tracelogService", "webweaverService" ];

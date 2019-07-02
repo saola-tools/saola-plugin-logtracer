@@ -4,25 +4,17 @@ const Devebot = require('devebot');
 const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
 
-function TracelogService(params) {
-  params = params || {};
-  let self = this;
+function TracelogService(params = {}) {
+  const L = params.loggingFactory.getLogger();
+  const T = params.loggingFactory.getTracer();
+  const packageName = params.packageName || 'app-tracelog';
+  const blockRef = chores.getBlockRef(__filename, packageName);
 
-  let LX = params.loggingFactory.getLogger();
-  let TR = params.loggingFactory.getTracer();
-  let packageName = params.packageName || 'app-tracelog';
-  let blockRef = chores.getBlockRef(__filename, packageName);
+  const pluginCfg = params.sandboxConfig || {};
+  const tracingRequestName = pluginCfg.tracingRequestName || 'requestId';
+  const webweaverService = params["app-webweaver/webweaverService"];
 
-  LX.has('silly') && LX.log('silly', TR.toMessage({
-    tags: [ blockRef, 'constructor-begin' ],
-    text: ' + constructor start ...'
-  }));
-
-  let pluginCfg = params.sandboxConfig;
-  let tracingRequestName = pluginCfg.tracingRequestName || 'requestId';
-  let webweaverService = params["app-webweaver/webweaverService"];
-
-  self.getRequestId = function(req) {
+  this.getRequestId = function(req) {
     return req && req[tracingRequestName];
   }
 
@@ -30,20 +22,20 @@ function TracelogService(params) {
   if (lodash.isString(tracingPaths)) tracingPaths = [ tracingPaths ];
   if (!lodash.isArray(tracingPaths)) tracingPaths = [];
 
-  self.addTracingPaths = function(paths) {
+  this.addTracingPaths = function(paths) {
     if (lodash.isEmpty(paths)) return;
     if (lodash.isString(paths)) paths = [paths];
     tracingPaths = lodash.union(tracingPaths, paths);
   }
 
   let tracingBoundary = function(req, res, next) {
-    LX.has('debug') && LX.log('debug', TR.add({
+    L.has('debug') && L.log('debug', T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
-      text: 'Request[${requestId}] is coming (begin)'
+      text: 'Request[${requestId}] is processing (begin)'
     }));
     req.on('end', function() {
-      LX.has('debug') && LX.log('debug', TR.add({
+      L.has('debug') && L.log('debug', T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
         text: 'Request[${requestId}] has finished (end)'
@@ -52,7 +44,7 @@ function TracelogService(params) {
     next();
   };
 
-  self.getTracingBoundaryLayer = function(branches) {
+  this.getTracingBoundaryLayer = function(branches) {
     return {
       name: 'app-tracelog-boundary',
       path: tracingPaths,
@@ -65,15 +57,15 @@ function TracelogService(params) {
     req[tracingRequestName] = req[tracingRequestName] ||
         req.get(pluginCfg.tracingRequestHeader) || req.query[tracingRequestName];
     if (!req[tracingRequestName]) {
-      req[tracingRequestName] = TR.getLogID();
-      LX.has('info') && LX.log('info', TR.add({
+      req[tracingRequestName] = T.getLogID();
+      L.has('info') && L.log('info', T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
         text: 'RequestID[${requestId}] is generated'
       }));
     }
     res.setHeader(pluginCfg.tracingRequestHeader, req[tracingRequestName]);
-    LX.has('info') && LX.log('info', TR.add({
+    L.has('info') && L.log('info', T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
       text: 'RequestID[${requestId}] is set to response header'
@@ -81,7 +73,7 @@ function TracelogService(params) {
     next();
   };
 
-  self.getTracingListenerLayer = function(branches) {
+  this.getTracingListenerLayer = function(branches) {
     return {
       name: 'app-tracelog-listener',
       path: tracingPaths,
@@ -90,23 +82,18 @@ function TracelogService(params) {
     }
   }
 
-  self.push = function(layerOrBranches, priority) {
+  this.push = function(layerOrBranches, priority) {
     priority = (typeof(priority) === 'number') ? priority : pluginCfg.priority;
     webweaverService.push(layerOrBranches, priority);
   }
 
   if (pluginCfg.autowired !== false) {
-    let layers = [ self.getTracingListenerLayer() ];
+    let layers = [ this.getTracingListenerLayer() ];
     if (pluginCfg.tracingBoundaryEnabled) {
-      layers.push(self.getTracingBoundaryLayer());
+      layers.push(this.getTracingBoundaryLayer());
     }
     webweaverService.push(layers, pluginCfg.priority);
   }
-
-  LX.has('silly') && LX.log('silly', TR.toMessage({
-    tags: [ blockRef, 'constructor-end' ],
-    text: ' - constructor end!'
-  }));
 };
 
 TracelogService.referenceList = [ "app-webweaver/webweaverService" ];
