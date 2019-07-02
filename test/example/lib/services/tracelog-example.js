@@ -3,8 +3,6 @@
 var Service = function(params) {
   params = params || {};
 
-  var self = this;
-
   var LX = params.loggingFactory.getLogger();
   var LT = params.loggingFactory.getTracer();
 
