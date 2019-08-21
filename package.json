@@ -1,6 +1,6 @@
 {
   "name": "app-tracelog",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Devebot application tracelog layerware",
   "homepage": "https://github.com/apporo/app-tracelog.git",
   "author": {
@@ -9,14 +9,12 @@
     "url": "https://github.com/apporo"
   },
   "main": "index.js",
-  "directories": {
-    "lib": "lib/"
-  },
   "files": [
     "bin/",
     "config/",
     "data/",
-    "lib/"
+    "lib/",
+    "manifest.js"
   ],
   "scripts": {
     "build": "babel ./src -d ./lib",
