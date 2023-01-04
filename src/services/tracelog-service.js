@@ -1,20 +1,20 @@
-'use strict';
+"use strict";
 
-const Devebot = require('devebot');
-const lodash = Devebot.require('lodash');
+const Devebot = require("devebot");
+const lodash = Devebot.require("lodash");
 
-function TracelogService(params = {}) {
+function TracelogService (params = {}) {
   const { loggingFactory, sandboxConfig, webweaverService } = params;
   const L = loggingFactory.getLogger();
   const T = loggingFactory.getTracer();
 
-  const tracingRequestName = sandboxConfig.tracingRequestName || 'requestId';
+  const tracingRequestName = sandboxConfig.tracingRequestName || "requestId";
 
   this.getRequestId = function(req) {
     return req && req[tracingRequestName];
-  }
+  };
 
-  let tracingPaths = lodash.get(sandboxConfig, ['tracingPaths']);
+  let tracingPaths = lodash.get(sandboxConfig, ["tracingPaths"]);
   if (lodash.isString(tracingPaths)) tracingPaths = [ tracingPaths ];
   if (!lodash.isArray(tracingPaths)) tracingPaths = [];
 
@@ -22,19 +22,19 @@ function TracelogService(params = {}) {
     if (lodash.isEmpty(paths)) return;
     if (lodash.isString(paths)) paths = [paths];
     tracingPaths = lodash.union(tracingPaths, paths);
-  }
+  };
 
   let tracingBoundary = function(req, res, next) {
-    L.has('debug') && L.log('debug', T.add({
+    L.has("debug") && L.log("debug", T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
-      text: 'Req[${requestId}] is processing (begin)'
+      text: "Req[${requestId}] is processing (begin)"
     }));
-    req.on('end', function() {
-      L.has('debug') && L.log('debug', T.add({
+    req.on("end", function() {
+      L.has("debug") && L.log("debug", T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
-        text: 'Req[${requestId}] has finished (end)'
+        text: "Req[${requestId}] has finished (end)"
       }));
     });
     next();
@@ -42,46 +42,49 @@ function TracelogService(params = {}) {
 
   this.getTracingBoundaryLayer = function(branches) {
     return {
-      name: 'app-tracelog-boundary',
+      name: "app-tracelog-boundary",
       path: tracingPaths,
       middleware: tracingBoundary,
       branches: branches
-    }
-  }
+    };
+  };
 
   let requestInterceptor = function(req, res, next) {
     req[tracingRequestName] = req[tracingRequestName] ||
         req.get(sandboxConfig.tracingRequestHeader) || req.query[tracingRequestName];
+    //
     if (!req[tracingRequestName]) {
       req[tracingRequestName] = T.getLogID();
-      L.has('info') && L.log('info', T.add({
+      L.has("info") && L.log("info", T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
-        text: 'Req[${requestId}] is generated'
+        text: "Req[${requestId}] is generated"
       }));
     }
+    //
     res.setHeader(sandboxConfig.tracingRequestHeader, req[tracingRequestName]);
-    L.has('info') && L.log('info', T.add({
+    L.has("info") && L.log("info", T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
-      text: 'Req[${requestId}] is set to response header'
+      text: "Req[${requestId}] is set to response header"
     }));
+    //
     next();
   };
 
   this.getTracingListenerLayer = function(branches) {
     return {
-      name: 'app-tracelog-listener',
+      name: "app-tracelog-listener",
       path: tracingPaths,
       middleware: requestInterceptor,
       branches: branches
-    }
-  }
+    };
+  };
 
   this.push = function(layerOrBranches, priority) {
-    priority = (typeof(priority) === 'number') ? priority : sandboxConfig.priority;
+    priority = (typeof(priority) === "number") ? priority : sandboxConfig.priority;
     webweaverService.push(layerOrBranches, priority);
-  }
+  };
 
   if (sandboxConfig.autowired !== false) {
     let layers = [ this.getTracingListenerLayer() ];
