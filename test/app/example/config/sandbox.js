@@ -1,4 +1,4 @@
-var contextPath = '/tracelog-demo';
+var contextPath = "/tracelog-demo";
 
 module.exports = {
   application: {
@@ -6,9 +6,9 @@ module.exports = {
   },
   plugins: {
     appTracelog: {
-      tracingRequestName: 'traceRequestId',
-      tracingRequestHeader: 'X-Trace-Request-Id',
-      tracingPaths: [ contextPath + '/tracing' ],
+      tracingRequestName: "traceRequestId",
+      tracingRequestHeader: "X-Trace-Request-Id",
+      tracingPaths: [ contextPath + "/tracing" ],
       tracingBoundaryEnabled: true
     },
     appWebweaver: {
