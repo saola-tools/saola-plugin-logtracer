@@ -1,6 +1,6 @@
 'use strict';
 
-const app = require('../../server');
+const app = require('../app/simplest');
 
 describe('app-logtracer', function() {
   describe('start/stop app.server', function() {
