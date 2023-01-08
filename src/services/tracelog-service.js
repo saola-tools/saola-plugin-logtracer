@@ -4,10 +4,38 @@ const Devebot = require("devebot");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
-const { DEFAULT_PORTLET_NAME, standardizeConfig } = require("app-webserver").require("portlet");
+const { portletifyConfig } = require("app-webserver").require("portlet");
+const { PortletMixiner } = require("../supports/portlet");
+
+function TracelogService (params = {}) {
+  const { packageName, loggingFactory, sandboxConfig, webweaverService } = params;
+  const L = loggingFactory.getLogger();
+  const T = loggingFactory.getTracer();
+  const blockRef = chores.getBlockRef(__filename, packageName || "app-webweaver");
+
+  const pluginConfig = portletifyConfig(sandboxConfig);
+
+  PortletMixiner.call(this, {
+    pluginConfig,
+    portletForwarder: webweaverService,
+    portletArguments: { L, T, blockRef, webweaverService },
+    PortletConstructor: TracelogPortlet,
+  });
+
+  // @deprecated
+  this.push = function(layerOrBranches, priority) {
+    return this.hasPortlet() && this.getPortlet().push(layerOrBranches, priority) || undefined;
+  };
+};
+
+Object.assign(TracelogService.prototype, PortletMixiner.prototype);
+
+TracelogService.referenceHash = {
+  webweaverService: "app-webweaver/webweaverService"
+};
 
 function TracelogPortlet (params = {}) {
-  const { L, T, portletConfig, portletName, portletForwarder } = params;
+  const { L, T, portletConfig, portletName, webweaverService } = params;
 
   const tracingRequestName = portletConfig.tracingRequestName || "requestId";
 
@@ -83,60 +111,19 @@ function TracelogPortlet (params = {}) {
   };
 
   this.push = function(layerOrBranches, priority) {
-    if (portletForwarder.hasPortlet(portletName)) {
+    if (webweaverService.hasPortlet(portletName)) {
       priority = (typeof(priority) === "number") ? priority : portletConfig.priority;
-      portletForwarder.getPortlet(portletName).push(layerOrBranches, priority);
+      webweaverService.getPortlet(portletName).push(layerOrBranches, priority);
     }
   };
 
-  if (portletConfig.autowired !== false && portletForwarder.hasPortlet(portletName)) {
+  if (portletConfig.autowired !== false && webweaverService.hasPortlet(portletName)) {
     let layers = [ this.getTracingListenerLayer() ];
     if (portletConfig.tracingBoundaryEnabled) {
       layers.push(this.getTracingBoundaryLayer());
     }
-    portletForwarder.getPortlet(portletName).push(layers, portletConfig.priority);
+    webweaverService.getPortlet(portletName).push(layers, portletConfig.priority);
   }
 }
-
-function TracelogService (params = {}) {
-  const { packageName, loggingFactory, sandboxConfig, webweaverService } = params;
-  const L = loggingFactory.getLogger();
-  const T = loggingFactory.getTracer();
-  const blockRef = chores.getBlockRef(__filename, packageName || "app-webweaver");
-
-  const pluginConfig = standardizeConfig(sandboxConfig);
-  const portletForwarder = webweaverService;
-
-  const _portlets = {};
-  lodash.forOwn(pluginConfig.portlets, function(portletConfig, portletName) {
-    _portlets[portletName] = new TracelogPortlet({ L, T, blockRef, portletConfig, portletName, portletForwarder });
-  });
-
-  this.getPortletNames = function() {
-    return lodash.keys(_portlets);
-  };
-
-  this.hasPortlet = function(portletName) {
-    portletName = portletName || DEFAULT_PORTLET_NAME;
-    if (!portletForwarder.hasPortlet(portletName)) {
-      return false;
-    }
-    return portletName in _portlets;
-  };
-
-  this.getPortlet = function(portletName) {
-    portletName = portletName || DEFAULT_PORTLET_NAME;
-    return _portlets[portletName];
-  };
-
-  // @deprecated
-  this.push = function(layerOrBranches, priority) {
-    return this.hasPortlet() && this.getPortlet().push(layerOrBranches, priority) || undefined;
-  };
-};
-
-TracelogService.referenceHash = {
-  webweaverService: "app-webweaver/webweaverService"
-};
 
 module.exports = TracelogService;

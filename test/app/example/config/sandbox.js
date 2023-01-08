@@ -1,4 +1,6 @@
-var contextPath = "/tracelog-demo";
+"use strict";
+
+const contextPath = "/tracelog-demo";
 
 module.exports = {
   application: {
