@@ -4,8 +4,7 @@ const Devebot = require("devebot");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
-const { portletifyConfig } = require("app-webserver").require("portlet");
-const { PortletMixiner } = require("../supports/portlet");
+const { portletifyConfig, PortletMixiner } = require("app-webserver").require("portlet");
 
 function TracelogService (params = {}) {
   const { packageName, loggingFactory, sandboxConfig, webweaverService } = params;
@@ -21,6 +20,26 @@ function TracelogService (params = {}) {
     portletArguments: { L, T, blockRef, webweaverService },
     PortletConstructor: TracelogPortlet,
   });
+
+  // @deprecated
+  this.getRequestId = function(req) {
+    return this.hasPortlet() && this.getPortlet().getRequestId(req) || undefined;
+  };
+
+  // @deprecated
+  this.addTracingPaths = function(paths) {
+    return this.hasPortlet() && this.getPortlet().addTracingPaths(paths) || undefined;
+  };
+
+  // @deprecated
+  this.getTracingBoundaryLayer = function(branches) {
+    return this.hasPortlet() && this.getPortlet().getTracingBoundaryLayer(branches) || undefined;
+  };
+
+  // @deprecated
+  this.getTracingListenerLayer = function(branches) {
+    return this.hasPortlet() && this.getPortlet().getTracingListenerLayer(branches) || undefined;
+  };
 
   // @deprecated
   this.push = function(layerOrBranches, priority) {
