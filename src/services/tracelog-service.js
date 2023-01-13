@@ -4,20 +4,18 @@ const Devebot = require("devebot");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
-const { portletifyConfig, PortletMixiner } = require("app-webserver").require("portlet");
+const portlet = require("app-webserver").require("portlet");
+const { PORTLETS_COLLECTION_NAME, portletifyConfig, PortletMixiner } = portlet;
 
 function TracelogService (params = {}) {
   const { packageName, loggingFactory, sandboxConfig, webweaverService } = params;
-  const L = loggingFactory.getLogger();
-  const T = loggingFactory.getTracer();
-  const blockRef = chores.getBlockRef(__filename, packageName || "app-webweaver");
 
   const pluginConfig = portletifyConfig(sandboxConfig);
 
   PortletMixiner.call(this, {
-    pluginConfig,
-    portletForwarder: webweaverService,
-    portletArguments: { L, T, blockRef, webweaverService },
+    portletDescriptors: lodash.get(pluginConfig, PORTLETS_COLLECTION_NAME),
+    portletReferenceHolders: { webweaverService },
+    portletArguments: { packageName, loggingFactory },
     PortletConstructor: TracelogPortlet,
   });
 
@@ -54,7 +52,16 @@ TracelogService.referenceHash = {
 };
 
 function TracelogPortlet (params = {}) {
-  const { L, T, portletConfig, portletName, webweaverService } = params;
+  const { packageName, loggingFactory, portletConfig, portletName, webweaverService } = params;
+
+  const L = loggingFactory.getLogger();
+  const T = loggingFactory.getTracer();
+  const blockRef = chores.getBlockRef(__filename, packageName || "app-tracelog");
+
+  L && L.has("silly") && L.log("silly", T && T.add({ portletName }).toMessage({
+    tags: [ blockRef, "TracelogPortlet", "starting" ],
+    text: " - portlet: ${portletName}"
+  }));
 
   const tracingRequestName = portletConfig.tracingRequestName || "requestId";
 
@@ -73,13 +80,13 @@ function TracelogPortlet (params = {}) {
   };
 
   let tracingBoundary = function(req, res, next) {
-    L.has("debug") && L.log("debug", T.add({
+    L && L.has("debug") && L.log("debug", T && T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
       text: "Req[${requestId}] is processing (begin)"
     }));
     req.on("end", function() {
-      L.has("debug") && L.log("debug", T.add({
+      L && L.has("debug") && L.log("debug", T && T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
         text: "Req[${requestId}] has finished (end)"
@@ -103,7 +110,7 @@ function TracelogPortlet (params = {}) {
     //
     if (!req[tracingRequestName]) {
       req[tracingRequestName] = T.getLogID();
-      L.has("info") && L.log("info", T.add({
+      L && L.has("info") && L.log("info", T && T.add({
         requestId: req[tracingRequestName]
       }).toMessage({
         text: "Req[${requestId}] is generated"
@@ -111,7 +118,7 @@ function TracelogPortlet (params = {}) {
     }
     //
     res.setHeader(portletConfig.tracingRequestHeader, req[tracingRequestName]);
-    L.has("info") && L.log("info", T.add({
+    L && L.has("info") && L.log("info", T && T.add({
       requestId: req[tracingRequestName]
     }).toMessage({
       text: "Req[${requestId}] is set to response header"
@@ -130,18 +137,16 @@ function TracelogPortlet (params = {}) {
   };
 
   this.push = function(layerOrBranches, priority) {
-    if (webweaverService.hasPortlet(portletName)) {
-      priority = (typeof(priority) === "number") ? priority : portletConfig.priority;
-      webweaverService.getPortlet(portletName).push(layerOrBranches, priority);
-    }
+    priority = (typeof(priority) === "number") ? priority : portletConfig.priority;
+    webweaverService.push(layerOrBranches, priority);
   };
 
-  if (portletConfig.autowired !== false && webweaverService.hasPortlet(portletName)) {
+  if (portletConfig.autowired !== false) {
     let layers = [ this.getTracingListenerLayer() ];
     if (portletConfig.tracingBoundaryEnabled) {
       layers.push(this.getTracingBoundaryLayer());
     }
-    webweaverService.getPortlet(portletName).push(layers, portletConfig.priority);
+    webweaverService.push(layers, portletConfig.priority);
   }
 }
 
