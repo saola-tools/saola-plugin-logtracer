@@ -56,7 +56,7 @@ function TracelogPortlet (params = {}) {
 
   const L = loggingFactory.getLogger();
   const T = loggingFactory.getTracer();
-  const blockRef = chores.getBlockRef(__filename, packageName || "app-tracelog");
+  const blockRef = chores.getBlockRef(__filename, packageName);
 
   L && L.has("silly") && L.log("silly", T && T.add({ portletName }).toMessage({
     tags: [ blockRef, "TracelogPortlet", "starting" ],
