@@ -5,15 +5,14 @@ const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
 const portlet = require("app-webserver").require("portlet");
-const { PORTLETS_COLLECTION_NAME, portletifyConfig, PortletMixiner } = portlet;
+const { getPortletDescriptors, PortletMixiner } = portlet;
 
 function TracelogService (params = {}) {
-  const { packageName, loggingFactory, sandboxConfig, webweaverService } = params;
-
-  const pluginConfig = portletifyConfig(sandboxConfig);
+  const { packageName, loggingFactory, sandboxOrigin, sandboxConfig, webweaverService } = params;
 
   PortletMixiner.call(this, {
-    portletDescriptors: lodash.get(pluginConfig, PORTLETS_COLLECTION_NAME),
+    portletDescriptors: getPortletDescriptors(sandboxConfig),
+    portletCommonConfig: sandboxOrigin,
     portletReferenceHolders: { webweaverService },
     portletArguments: { packageName, loggingFactory },
     PortletConstructor: TracelogPortlet,
@@ -106,7 +105,8 @@ function TracelogPortlet (params = {}) {
 
   let requestInterceptor = function(req, res, next) {
     req[tracingRequestName] = req[tracingRequestName] ||
-        req.get(portletConfig.tracingRequestHeader) || req.query[tracingRequestName];
+        portletConfig.tracingRequestHeader && req.get(portletConfig.tracingRequestHeader) ||
+        req.query[tracingRequestName];
     //
     if (!req[tracingRequestName]) {
       req[tracingRequestName] = T.getLogID();
@@ -117,12 +117,14 @@ function TracelogPortlet (params = {}) {
       }));
     }
     //
-    res.setHeader(portletConfig.tracingRequestHeader, req[tracingRequestName]);
-    L && L.has("info") && L.log("info", T && T.add({
-      requestId: req[tracingRequestName]
-    }).toMessage({
-      text: "Req[${requestId}] is set to response header"
-    }));
+    if (portletConfig.tracingRequestHeader) {
+      res.setHeader(portletConfig.tracingRequestHeader, req[tracingRequestName]);
+      L && L.has("info") && L.log("info", T && T.add({
+        requestId: req[tracingRequestName]
+      }).toMessage({
+        text: "Req[${requestId}] is set to response header"
+      }));
+    }
     //
     next();
   };
