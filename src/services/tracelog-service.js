@@ -1,10 +1,10 @@
 "use strict";
 
-const Devebot = require("devebot");
+const Devebot = require("@saola/core");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
-const portlet = require("app-webserver").require("portlet");
+const portlet = require("@saola/plugin-webserver").require("portlet");
 const { getPortletDescriptors, PortletMixiner } = portlet;
 
 function TracelogService (params = {}) {
@@ -47,7 +47,7 @@ function TracelogService (params = {}) {
 Object.assign(TracelogService.prototype, PortletMixiner.prototype);
 
 TracelogService.referenceHash = {
-  webweaverService: "app-webweaver/webweaverService"
+  webweaverService: "@saola/plugin-webweaver/webweaverService"
 };
 
 function TracelogPortlet (params = {}) {
@@ -96,7 +96,7 @@ function TracelogPortlet (params = {}) {
 
   this.getTracingBoundaryLayer = function(branches) {
     return {
-      name: "app-tracelog-boundary",
+      name: "saola-plugin-logtracer-boundary",
       path: tracingPaths,
       middleware: tracingBoundary,
       branches: branches
@@ -131,7 +131,7 @@ function TracelogPortlet (params = {}) {
 
   this.getTracingListenerLayer = function(branches) {
     return {
-      name: "app-tracelog-listener",
+      name: "saola-plugin-logtracer-listener",
       path: tracingPaths,
       middleware: requestInterceptor,
       branches: branches

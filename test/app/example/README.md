@@ -1,4 +1,4 @@
-# app-tracelog test/example
+# saola-plugin-logtracer test/example
 
 ## Usage
 

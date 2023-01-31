@@ -2,7 +2,7 @@
 
 module.exports = {
   plugins: {
-    appTracelog: {
+    pluginLogtracer: {
     }
   }
 };

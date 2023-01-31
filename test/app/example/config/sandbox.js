@@ -7,13 +7,13 @@ module.exports = {
     contextPath: contextPath
   },
   plugins: {
-    appTracelog: {
+    pluginLogtracer: {
       tracingRequestName: "traceRequestId",
       tracingRequestHeader: "X-Trace-Request-Id",
       tracingPaths: [ contextPath + "/tracing" ],
       tracingBoundaryEnabled: true
     },
-    appWebweaver: {
+    pluginWebweaver: {
     }
   }
 };

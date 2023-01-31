@@ -2,9 +2,7 @@
 
 const path = require("path");
 
-var Service = function(params) {
-  params = params || {};
-
+function Service (params = {}) {
   var LX = params.loggingFactory.getLogger();
   var LT = params.loggingFactory.getTracer();
 
@@ -29,7 +27,7 @@ var Service = function(params) {
 
   params.tracelogService.push([
     {
-      name: "app-tracelog-example",
+      name: "saola-plugin-logtracer-example",
       path: contextPath,
       middleware: router
     }

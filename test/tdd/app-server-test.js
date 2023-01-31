@@ -2,7 +2,7 @@
 
 const app = require("../app/simplest");
 
-describe("app-logtracer", function() {
+describe("@saola/plugin-logtracer", function() {
   describe("start/stop app.server", function() {
     it("app.server should be started/stopped properly", function() {
       return app.server.start().then(function() {

@@ -2,10 +2,10 @@
 
 var path = require("path");
 
-var app = require("devebot").launchApplication({
+var app = require("@saola/core").launchApplication({
   appRootPath: __dirname
 }, [{
-  name: "app-tracelog",
+  name: "@saola/plugin-logtracer",
   path: path.join(__dirname, "../../../", "index.js")
 }]);
 

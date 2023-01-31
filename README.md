@@ -1,3 +1,3 @@
-# app-tracelog
+# @saola/plugin-logtracer
 
-> Devebot application tracelog layerware
+> Saola logtracer plugin layerware
