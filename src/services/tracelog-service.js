@@ -11,8 +11,8 @@ function TracelogService (params = {}) {
   const { packageName, loggingFactory, sandboxOrigin, sandboxConfig, webweaverService } = params;
 
   PortletMixiner.call(this, {
+    portletBaseConfig: sandboxOrigin,
     portletDescriptors: getPortletDescriptors(sandboxConfig),
-    portletCommonConfig: sandboxOrigin,
     portletReferenceHolders: { webweaverService },
     portletArguments: { packageName, loggingFactory },
     PortletConstructor: TracelogPortlet,
