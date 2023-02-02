@@ -3,19 +3,20 @@
 const path = require("path");
 
 function Service (params = {}) {
-  var LX = params.loggingFactory.getLogger();
-  var LT = params.loggingFactory.getTracer();
+  const { loggingFactory, sandboxConfig, webweaverService, tracelogService } = params;
 
-  var pluginCfg = params.sandboxConfig;
-  var contextPath = pluginCfg.contextPath || "/tracelog";
-  var express = params.webweaverService.express;
+  const L = loggingFactory.getLogger();
+  const T = loggingFactory.getTracer();
 
-  var router = new express();
+  const contextPath = sandboxConfig.contextPath || "/tracelog";
+  const express = webweaverService.express;
+
+  const router = express();
   router.set("views", path.join(__dirname, "/../../views"));
   router.set("view engine", "ejs");
   router.route("/tracing/index").get(function(req, res, next) {
-    LX.has("debug") && LX.log("debug", LT.add({
-      reqId: params.tracelogService.getRequestId(req)
+    L.has("debug") && L.log("debug", T.add({
+      reqId: tracelogService.getRequestId(req)
     }).toMessage({
       text: "--- RequestID --- : ${reqId}"
     }));
@@ -25,13 +26,13 @@ function Service (params = {}) {
     res.render("index", {requestId: req.traceRequestId || "[empty]"});
   });
 
-  params.tracelogService.push([
+  tracelogService.push([
     {
       name: "saola-plugin-logtracer-example",
       path: contextPath,
       middleware: router
     }
-  ], pluginCfg.priority);
+  ], sandboxConfig.priority);
 };
 
 Service.referenceList = [ "tracelogService", "webweaverService" ];

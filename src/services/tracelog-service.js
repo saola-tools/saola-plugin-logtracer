@@ -4,7 +4,7 @@ const Devebot = require("@saola/core");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 
-const portlet = require("@saola/plugin-webserver").require("portlet");
+const portlet = Devebot.require("portlet");
 const { getPortletDescriptors, PortletMixiner } = portlet;
 
 function TracelogService (params = {}) {
