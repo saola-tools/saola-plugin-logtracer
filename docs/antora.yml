@@ -1,0 +1,5 @@
+name: saola-plugin-logtracer
+title: "Saola Plugin: LogTracer"
+version: master
+nav:
+- modules/ROOT/nav.adoc

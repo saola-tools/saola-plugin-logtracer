@@ -1,0 +1,3 @@
+= Tổng quan
+
+Gói bổ sung `LogTracer` là một thành phần cắm thêm (plugin) của Saola Framework.
