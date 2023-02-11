@@ -1,3 +1,3 @@
 # @saola/plugin-logtracer
 
-> Saola logtracer plugin layerware
+> Saola logtracer plugin

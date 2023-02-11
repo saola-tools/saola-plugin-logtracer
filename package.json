@@ -1,13 +1,8 @@
 {
   "name": "@saola/plugin-logtracer",
   "version": "0.4.1",
-  "description": "Saola logtracer plagin layerware",
-  "homepage": "https://github.com/saolajs/saola-plugin-logtracer.git",
-  "author": {
-    "name": "SaolaJS",
-    "email": "contact@saolajs.com",
-    "url": "https://github.com/saolajs"
-  },
+  "description": "Saola LogTracer plugin",
+  "author": "Saola Development Team",
   "main": "index.js",
   "engines": {
     "node": ">=12"
@@ -32,6 +27,10 @@
     "test": "npm run testOnly",
     "prepublishOnly": "npm run check-silent && npm run clean && NODE_ENV=${SAOLA_NODE_ENV:-production} npm run build",
     "verify": "npm run prepublishOnly && npm run testOnly"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saola-tools/saola-plugin-logtracer.git"
   },
   "keywords": [
     "saola",

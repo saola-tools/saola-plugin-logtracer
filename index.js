@@ -1,1 +1,3 @@
-module.exports = require("@saola/core").registerLayerware(__dirname, ["@saola/plugin-webweaver"], []);
+module.exports = require("@saola/core").registerLayerware(__dirname, [
+  "@saola/plugin-webweaver"
+], []);
